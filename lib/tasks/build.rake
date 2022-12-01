@@ -4,7 +4,7 @@ namespace :tailwindcss do
     debug = args.extras.include?("debug")
     command = Tailwindcss::Commands.compile_command(debug: debug)
     puts command.inspect
-    system(*command, exception: true)
+    command.each { |c| system(*c, exception: true) }
   end
 
   desc "Watch and build your Tailwind CSS on file changes"
@@ -14,6 +14,7 @@ namespace :tailwindcss do
     command = Tailwindcss::Commands.watch_command(debug: debug, poll: poll)
     puts command.inspect
     system(*command)
+    command.each { |c| system(*c) }
   end
 end
 

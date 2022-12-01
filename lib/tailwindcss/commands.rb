@@ -56,20 +56,27 @@ module Tailwindcss
       end
 
       def compile_command(debug: false, **kwargs)
-        [
-          executable(**kwargs),
-          "-i", Rails.root.join("app/assets/stylesheets/application.tailwind.css").to_s,
-          "-o", Rails.root.join("app/assets/builds/tailwind.css").to_s,
-          "-c", Rails.root.join("config/tailwind.config.js").to_s,
-        ].tap do |command|
-          command << "--minify" unless debug
+        input_file_paths = Dir::glob("app/assets/stylesheets/**/*.tailwind.css")
+
+        input_file_paths.map do |file_path|
+          input_name = File.basename(file_path, ".tailwind.css")
+          [
+            executable(**kwargs),
+            "-i", Rails.root.join(file_path).to_s,
+            "-o", Rails.root.join("app/assets/builds/tailwind-#{input_name}.css").to_s,
+            "-c", Rails.root.join("config/tailwindcss/#{input_name}.config.js").to_s,
+          ].tap do |command|
+            command << "--minify" unless debug
+          end
         end
       end
 
       def watch_command(poll: false, **kwargs)
-        compile_command(**kwargs).tap do |command|
-          command << "-w"
-          command << "-p" if poll
+        compile_command(**kwargs).map do |command_args|
+          command_args.tap do |command|
+            command << "-w"
+            command << "-p" if poll
+          end
         end
       end
     end
